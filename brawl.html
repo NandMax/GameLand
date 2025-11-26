@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brawl Star Story</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo">GameLand</div>
+        <p>Sua Plataforma de Jogos Favorita</p>
+        <a href="index.html" class="btn-voltar">Voltar ◀</a>
+    </header>
+
+    <main>
+        <div class="game-container">
+
+            <div class="left-panel">
+                <img src="image/brawl/icon/Brawl-logo.jpg" class="logo-brawl">
+                <h3>Contador de Mortes:</h3>
+                <div id="contador" class="contador">0</div>
+                <h3>Jogos Ganhos:</h3>
+                <div id="vitorias" class="contador">0</div>
+                <button id="startBtn" class="btn-start">Iniciar</button>
+            </div>
+
+            <div class="center-panel">
+                <img id="screen" src="image/brawl/fases/Tela-inicial.jpg" class="screen">
+                <div id="mensagem" class="mensagem-box"></div>
+
+                <div class="options">
+                    <button id="op1" class="option-btn">Sim</button>
+                    <button id="op2" class="option-btn">Não</button>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <h3>Personagens encontrados</h3>
+
+                <div class="emoji-list" id="emojiList">
+                    <div class="char"><img src="image/brawl/icon/Shelly-icon.jpg" class="locked" id="char-shelly"> </div>
+                    <div class="char"><img src="image/brawl/icon/Piper-icon.jpg" class="locked" id="char-piper"> </div>
+                    <div class="char"><img src="image/brawl/icon/Dyna-icon.jpg" class="locked" id="char-dyna"></div>
+                    <div class="char"><img src="image/brawl/icon/Leon-icon.jpg" class="locked" id="char-leon"></div> 
+                    <div class="char"><img src="image/brawl/icon/Gene-icon.jpg" class="locked" id="char-gene"></div>
+                    <div class="char"><img src="image/brawl/icon/Gale-icon.jpg" class="locked" id="char-gale"></div>
+                    <div class="char"><img src="image/brawl/icon/Mico-icon.jpg" class="locked" id="char-mico"></div>
+                    <div class="char"><img src="image/brawl/icon/Edgar-icon.jpg" class="locked" id="char-edgar"></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="explosao-container"></div>
+
+    <footer>
+        <p>-Brawl Star Story-</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

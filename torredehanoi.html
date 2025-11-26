@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torre de Hanoi</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo">GameLand</div>
+        <p>Sua Plataforma de Jogos Favorita</p>
+        <a href="index.html" class="btn-voltar">Voltar ◀</a>
+    </header>
+
+    <main class="game-container">
+        
+        <aside class="left-panel">
+            <img src="image/cards/Hanoi-logo.jpg" class="logo-jogo">
+
+            <h2>Melhores</h2>
+
+            <div class="ranking">
+                <div class="r-item"><span>Dr.Eggman</span><span>1:09</span></div>
+                <div class="r-item"><span>Peach</span><span>1:31</span></div>
+                <div class="r-item"><span>Mago Escarlate</span><span>2:00</span></div>
+            </div>
+
+            <div class="player-box" id="ranking-msg">
+                <h3>Dados do Jogador</h3>
+                <input type="text" id="nome" placeholder="Insira seu nome para entrar no ranking" />
+            </div>
+
+        </aside>
+
+        <div class="center-panel">
+            <div id="mensagemTopo" class="msg-topo">Pronto para começar?</div>
+            <div id="torres">
+                <div class="torre" data-id="0">
+                    <div class="disco d5"></div>
+                    <div class="disco d4"></div>
+                    <div class="disco d3"></div>
+                    <div class="disco d2"></div>
+                    <div class="disco d1"></div>
+                </div>
+
+                <div class="torre" data-id="1"></div>
+                <div class="torre" data-id="2"></div>
+            </div>
+            <button id="resetBtn" class="btn-reset">Recomeçar</button>
+        </div>
+
+        <aside class="right-panel">
+            <h2>Temporizadores</h2>
+            <h3>Seu recorde</h3>
+            <div class="box cor1" id="recorde">0:00</div>
+
+            <h3>Último jogo</h3>
+            <div class="box cor2" id="ultimo">0:00</div>
+
+            <h3>Tempo atual</h3>
+            <div class="box cor3" id="tempo">0:00</div>
+
+            <button id="startBtn" class="btn-start">Iniciar</button>
+        </aside>
+
+    </main>
+
+    <div id="explosao-container"></div>
+
+    <footer>
+        <p>Torre de Hanoi</p>
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batata Quente</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo">GameLand</div>
+        <p>Sua Plataforma de Jogos Favorita</p>
+        <a href="index.html" class="btn-voltar">Voltar ◀</a>
+    </header>
+
+    <main class="game-container">
+
+        <!-- Lado Esquerdo -->
+        <section class="left-panel">
+            <img src="image/batata/Batata-logo.jpg" class="logo-batata">
+
+            <div class="placar">
+                <h2>Ranking:</h2>
+
+                <div id="ranking-container">
+
+                    <div class="r-item" data-jogador="1">
+                        <img src="image/batata/Player.png" class="icone azul">
+                        <span class="nome">Jogador 1</span>
+                        <span class="pontos" id="p1">0</span>
+                    </div>
+
+                    <div class="r-item" data-jogador="2">
+                        <img src="image/batata/Player.png" class="icone vermelho">
+                        <span class="nome">Jogador 2</span>
+                        <span class="pontos" id="p2">0</span>
+                    </div>
+
+                    <div class="r-item" data-jogador="3">
+                        <img src="image/batata/Player.png" class="icone amarelo">
+                        <span class="nome">Jogador 3</span>
+                        <span class="pontos" id="p3">0</span>
+                    </div>
+
+                    <div class="r-item" data-jogador="4">
+                        <img src="image/batata/Player.png" class="icone verde">
+                        <span class="nome">Jogador 4</span>
+                        <span class="pontos" id="p4">0</span>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Área da batata -->
+        <section class="center-panel">
+            <img id="tela-batata" src="image/batata/Tela-inicial.jpg" class="tela-inicial">
+            <div id="msg-batata" class="mensagem">Podemos Começar? </div>
+
+            <div class="botoes">
+                <button id="btnPassar" class="option-btn">Sim</button>
+                <button id="btnEsperar" class="option-btn">Não</button>
+            </div>
+        </section>
+
+        <!-- Lado direito -->
+        <section class="right-panel">
+            <h3>Lista de Jogadores</h3>
+
+            <div class="jogador">
+                <h4 class="j j1">Jogador 1:</h4>
+                <input id="j1" placeholder="Insira seu nome">
+            </div>
+
+            <div class="jogador">
+                <h4 class="j j2">Jogador 2:</h4>
+                <input id="j2" placeholder="Insira seu nome">
+            </div>
+
+            <div class="jogador">
+                <h4 class="j j3">Jogador 3:</h4>
+                <input id="j3" placeholder="Insira seu nome">
+            </div>
+
+            <div class="jogador">
+                <h4 class="j j4">Jogador 4:</h4>
+                <input id="j4" placeholder="Insira seu nome">
+            </div>
+
+            <h3 class="ganhador">Ganhador:</h3>
+            <div id="ganhador"></div>
+
+            <button id="btnPlay" class="btn-start">Play</button>
+        </section>
+
+    </main>
+
+    <div id="explosao-container"></div>
+
+    <footer>
+        <p>-Batata Quente-</p>
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

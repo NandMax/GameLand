@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo de Casal - GameLand</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="logo">GameLand</div>
+    <p>Sua Plataforma de Jogos Favorita</p>
+    <a href="index.html" class="btn-voltar">Voltar ◀</a>
+  </header>
+
+  <main>
+    <div class="game-container">
+      
+      <div class="left-panel">
+        <img src="image/match/Match-logo.jpg" class="logo-match">
+
+        <h3 class="ranking-title">Ranking Semanal</h3>
+        <ul id="ranking-list" class="ranking-list">
+          <li class="ranking-item female-bg" data-score="95">Mônica + Chandler (95%)</li>
+          <li class="ranking-item male-bg" data-score="79">Virgínia + Vinícius (79%)</li>
+          <li class="ranking-item female-bg" data-score="78">Fernanda + Eduardo (78%)</li>
+          <li class="ranking-item male-bg" data-score="75">Julieta + Romeu (75%)</li>
+          <li class="ranking-item female-bg" data-score="75">Shrek + Fiona (75%)</li>
+        </ul>
+      </div>
+
+      <div class="center-panel">
+        <h3 class="title-center">Descubra a compatibilidade com seu parceiro(a)</h3>
+        
+        <div class="painel-central"> 
+            
+            <img src="image/match/Casal.jpg" class="tela-inicial" id="tela-lover">
+            
+            <div class="container-p">
+                <div class="porcentagem">
+                    <span>100%</span>
+                    <span>90%</span>
+                    <span>80%</span>
+                    <span>70%</span>
+                    <span>60%</span>
+                    <span>50%</span>
+                    <span>40%</span>
+                    <span>30%</span>
+                    <span>20%</span>
+                    <span>10%</span>
+                    <span>0%</span>
+                </div>
+                <div class="heart-barra">
+                    <div id="heart-bar" class="heart-bar" style="height: 0%;"></div>
+                    <div class="heart-icon">❤️</div>
+                </div>
+            </div>
+        </div> 
+        
+    </div>
+
+      <div class="right-panel">
+        <h3 class="title">Compatibilidade do Casal</h3>
+        <form id="form-casal">
+            <label for="nome1">Digite o nome dela:</label>
+            <input type="text" id="nome1" name="nome1" required class="name-input female-input">
+
+            <label for="nome2">Digite o nome dele:</label>
+            <input type="text" id="nome2" name="nome2" required class="name-input male-input">
+
+            <button type="submit" class="calculate-btn">Calcular</button>
+
+            <p class="result-label">Compatibilidade:</p>
+            <div id="result-box" class="result-box"></div>
+        </form>
+        
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>Deu Match</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
