@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameLand</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="logo">GameLand</div>
+        <p>Sua Plataforma de Jogos Favorita</p>
+    </header>
+
+    <section class="jogos">
+
+        <div class="destaque">
+            <h2>Jogo em Destaque</h2>
+
+            <a href="brawl.html">
+                <img src="image/cards/BrawlStar.jpg" alt="Brawl Stars Story">
+            </a>
+
+            <div class="caixa-descricao">
+                <h3>Brawl Star Story</h3>
+                <p>Um jogo de escolhas e decições inspirado no mundo de Brawl Stars, explore o jogo e conheça os diferentes finais que te aguardam</p>
+            </div>
+
+            <div class="botoes">
+                <a href="brawl.html" class="play-btn">▶ Jogar</a>
+                <button class="rate-btn" data-game="brawl">⭐ Avaliar</button>
+            </div>
+
+
+            <!-- Caixa do popup -->
+            <div id="popup-bg" class="popup-bg hidden">
+            <div class="popup-box">
+                <h3>Avalie este jogo</h3>
+
+                <div class="stars">
+                    <span data-star="1">★</span>
+                    <span data-star="2">★</span>
+                    <span data-star="3">★</span>
+                    <span data-star="4">★</span>
+                    <span data-star="5">★</span>
+                </div>
+
+                <button id="closePopup" class="close-btn">Fechar</button>
+            </div>
+            </div>
+            
+        </div>
+
+        <div class="minijogos">
+            <h2>Conheça nossos jogos</h2>
+
+            <div class="grid">
+
+                <div class="card">
+                    <a href="batataquente.html"><img src="image/cards/BatataQuente.jpg" alt="Batata Quente"></a>
+                    <div class="caixa-descricao">Passe a batata antes que exploda!</div>
+                    <div class="botoes">
+                        <a class="play-btn" href="batataquente.html">▶ Jogar</a>
+                        <button class="rate-btn" data-game="batata">⭐ Avaliar</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <a href="jogadavelha.html"><img src="image/cards/JogodaVelha.jpg" alt="Jogo da Velha"></a>
+                    <div class="caixa-descricao">O clássico jogo de X e O!</div>
+                    <div class="botoes">
+                        <a class="play-btn" href="jogodavelha.html">▶ Jogar</a>
+                        <button class="rate-btn" data-game="velha">⭐ Avaliar</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <a href="torredehanoi.html"><img src="image/cards/TorredeHanoi.jpg" alt="Torre de Hanoi"></a>
+                    <div class="caixa-descricao">Resolva esse quebra-cabeça desafiador!</div>
+                    <div class="botoes">
+                        <a class="play-btn" href="torredehanoi.html">▶ Jogar</a>
+                        <button class="rate-btn" data-game="hanoi">⭐ Avaliar</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <a href="deumatch.html"><img src="image/cards/DeuMatch.jpg" alt="Deu Match"></a>
+                    <div class="caixa-descricao">Será se deu Match com o seu parceiro!</div>
+                    <div class="botoes">
+                        <a class="play-btn" href="deumatch.html">▶ Jogar</a>
+                        <button class="rate-btn" data-game="match">⭐ Avaliar</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </section>
+
+    <script>
+        const popupBg = document.getElementById("popup-bg");
+        const rateButtons = document.querySelectorAll(".rate-btn");
+        const closePopup = document.getElementById("closePopup");
+        const stars = document.querySelectorAll(".stars span");
+
+        let currentGameId = "";
+
+        // Mostrar popup ao clicar no botão Avaliar
+        rateButtons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                currentGameId = btn.dataset.game;
+                popupBg.classList.remove("hidden");
+                loadRating();
+            });
+        });
+
+        // Fechar popup
+       closePopup.addEventListener("click", () => popupBg.classList.add("hidden"));
+
+        // Fechar clicando fora
+        popupBg.addEventListener("click", (e) => {
+            if (e.target === popupBg) popupBg.classList.add("hidden");
+        });
+
+        // Clicar nas estrelas
+        stars.forEach((star, index) => {
+            star.addEventListener("click", () => {
+                stars.forEach((s, i) => {
+                    s.classList.toggle("active", i <= index);
+                });
+                localStorage.setItem("rating_" + currentGameId, index + 1);
+            });
+        });
+
+
+        // Carregar nota salva
+        function loadRating() {
+            let saved = localStorage.getItem("rating_" + currentGameId);
+            stars.forEach(s => s.classList.remove("active"));
+
+            if (saved) {
+                for (let i = 0; i < saved; i++) {
+                    stars[i].classList.add("active");
+                }
+            }
+        }
+    </script>
+
+
+    <footer>
+        <p>- GameLand -</p>
+    </footer>
+
+</body>
+</html>
