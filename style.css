@@ -3,6 +3,9 @@ body {
     background-color: #42c7d3;
     font-family: Arial, sans-serif;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 header {
@@ -13,6 +16,14 @@ header {
     padding: 0 10px 0 10px;
     font-size: 20px;
     font-weight: bold;
+}
+
+html, body {
+  height: 100%;
+}
+
+main{
+    flex: 1;
 }
 
 footer {
