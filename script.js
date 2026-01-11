@@ -1215,15 +1215,29 @@ let segundos = 0;
 let intervalo;
 let jogoAtivo = false;
 
-let ranking = [
-    {nome:"Dr.Eggman", tempo:69},
-    {nome:"Peach", tempo:91},
-    {nome:"Mago Escarlate", tempo:120}
+let ranking = JSON.parse(localStorage.getItem("rankingHanoi")) || [
+    {nome:"The Flash", tempo:30},
+    {nome:"Dr.Eggman", tempo:59},
+    {nome:"Mario Bross", tempo:75},
+    {nome:"Peach", tempo:90},
+    {nome:"Patolino Mago", tempo:120}
 ];
 
+atualizarRankingHTML();
+
 const msgTopo = document.getElementById("mensagemTopo");
-const resetBtn = document.getElementById("resetBtn");
 const nomeInput = document.getElementById("nome");
+const recordeBox = document.getElementById("recorde");
+const startBtn = document.getElementById("startBtn");
+
+// carregar recorde salvo
+const recordeSalvo = localStorage.getItem("recordeHanoi");
+if (recordeSalvo !== null) {
+    recordeBox.dataset.segundos = recordeSalvo;
+    const m = Math.floor(recordeSalvo / 60);
+    const s = String(recordeSalvo % 60).padStart(2, "0");
+    recordeBox.textContent = `${m}:${s}`;
+}
 
 nomeInput.addEventListener("keypress", function(e) {
     if (e.key === "Enter") adicionarAoRanking();
@@ -1236,25 +1250,23 @@ function iniciarJogo() {
     segundos = 0;
 
     msgTopo.textContent = "Jogo iniciado!";
-    resetBtn.style.display = "none";
+    startBtn.classList.add("oculto");
+    document.getElementById("ranking-msg").style.display = "none";
 
     clearInterval(intervalo);
     intervalo = setInterval(() => {
         segundos++;
-        const m = String(Math.floor(segundos / 60));
+        const m = Math.floor(segundos / 60);
         const s = String(segundos % 60).padStart(2, "0");
         document.getElementById("tempo").textContent = `${m}:${s}`;
     }, 1000);
 }
-
-document.getElementById("startBtn").onclick = iniciarJogo;
 
 document.querySelectorAll(".disco").forEach(disco => {
     disco.addEventListener("click", iniciarJogo);
 });
 
 let discoSelecionado = null;
-
 document.querySelectorAll(".torre").forEach(torre => {
     torre.addEventListener("click", () => moverDisco(torre));
 });
@@ -1297,7 +1309,7 @@ function checarVitoria() {
 
         const tempoTexto = document.getElementById("tempo").textContent;
         const tempoFinal = segundos;
-        const piorTempo = ranking[ranking.length - 1].tempo;
+        const piorTempo = ranking.length ? ranking[ranking.length - 1].tempo : Infinity;
 
         document.getElementById("ultimo").textContent = tempoTexto;
 
@@ -1315,56 +1327,15 @@ function checarVitoria() {
 
         // Salvar recorde
         if (tempoFinal < recordeAtual) {
-            document.getElementById("recorde").dataset.segundos = tempoFinal;
-            document.getElementById("recorde").textContent = tempoTexto;
+            recordeBox.dataset.segundos = tempoFinal;
+            recordeBox.textContent = tempoTexto;
+            localStorage.setItem("recordeHanoi", tempoFinal);
         }
 
-        resetBtn.style.display = "block";
+        startBtn.textContent = "Recomeçar";
+        startBtn.classList.remove("oculto");
+        jogoAtivo = false;
     }
-}
-
-resetBtn.onclick = () => {
-    clearInterval(intervalo);
-    jogoAtivo = false;
-    segundos = 0;
-
-    document.getElementById("tempo").textContent = "0:00";
-
-    msgTopo.textContent = "Pronto para começar?";
-    resetBtn.style.display = "none";
-
-    document.querySelectorAll(".torre").forEach(t => {
-        if (t.dataset.id !== "0") {
-            t.innerHTML = "";
-        }
-    });
-
-    const torreInicial = document.querySelector('.torre[data-id="0"]');
-    torreInicial.innerHTML = `
-        <div class="disco d5"></div>
-        <div class="disco d4"></div>
-        <div class="disco d3"></div>
-        <div class="disco d2"></div>
-        <div class="disco d1"></div>
-    `;
-    
-    discoSelecionado = null;
-};
-
-function adicionarAoRanking() {
-    const nome = nomeInput.value.trim();
-    if (nome === "") return;
-
-    ranking.push({ nome: nome, tempo: segundos });
-    ranking.sort((a, b) => a.tempo - b.tempo);
-
-    ranking = ranking.slice(0, 3);
-    atualizarRankingHTML();
-
-    nomeInput.value = "";
-    document.getElementById("ranking-msg").style.display = "none";
-
-    msgTopo.textContent = "Ranking atualizado!";
 }
 
 function atualizarRankingHTML() {
@@ -1383,6 +1354,71 @@ function atualizarRankingHTML() {
         `;
     });
 }
+
+function adicionarAoRanking() {
+    const nome = nomeInput.value.trim();
+    if (nome === "") return;
+
+    // Procura o jogador no ranking
+    const jogador = ranking.find(item =>
+        item.nome.toLowerCase() === nome.toLowerCase()
+    );
+
+    if (jogador) {
+        // Se o novo tempo for melhor, atualiza
+        if (segundos < jogador.tempo) {
+            jogador.tempo = segundos;
+            msgTopo.textContent = "Seu recorde entrou no Ranking 🎉";
+        } else {
+            msgTopo.textContent = "Seu tempo não foi melhor que o anterior :(";
+        }
+    } else {
+        // Novo jogador
+        ranking.push({ nome: nome, tempo: segundos });
+        msgTopo.textContent = "Você entrou no ranking!";
+    }
+
+    // ordena e mantém só os 5 melhores
+    ranking.sort((a, b) => a.tempo - b.tempo);
+    ranking = ranking.slice(0, 5);
+
+    localStorage.setItem("rankingHanoi", JSON.stringify(ranking));
+    atualizarRankingHTML();
+
+    nomeInput.value = "";
+    document.getElementById("ranking-msg").style.display = "none";
+}
+
+function resetarJogo() {
+    clearInterval(intervalo);
+    jogoAtivo = false;
+    segundos = 0;
+
+    document.getElementById("tempo").textContent = "0:00";
+    msgTopo.textContent = "Pronto para começar?";
+
+    // limpar torres
+    document.querySelectorAll(".torre").forEach(t => t.innerHTML = "");
+
+    // recriar torre inicial
+    const torreInicial = document.querySelector('.torre[data-id="0"]');
+    torreInicial.innerHTML = `
+        <div class="disco d5"></div>
+        <div class="disco d4"></div>
+        <div class="disco d3"></div>
+        <div class="disco d2"></div>
+        <div class="disco d1"></div>
+    `;
+
+    discoSelecionado = null;
+}
+
+startBtn.onclick = () => {
+    if (!jogoAtivo && startBtn.textContent === "Recomeçar") {
+        resetarJogo();
+    }
+    iniciarJogo();
+};
 }); /* Fim ds Torre de Hannoi */
 
 /* Animação de Vitória */
