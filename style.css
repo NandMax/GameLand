@@ -396,6 +396,11 @@ footer {
     animation: unlockGlow 1.5s ease-out;
 }
 
+button.selecionado {
+    outline: 3px solid #181817;
+    transform: scale(1.05);
+}
+
 /*===============Batata Quente===============*/
 :root {
     --filtro-azul: brightness(3) invert(0.2) sepia(1) hue-rotate(200deg) saturate(8);

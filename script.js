@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
 let morto = false;
 let contador = 0;
 let vitorias = 0;
+let opcaoSelecionada = 0;
 
 const img = document.getElementById("screen");
 const textoTela = document.getElementById("mensagem");
@@ -11,6 +12,7 @@ const vitoriasHtml = document.getElementById("vitorias");
 const op1 = document.getElementById("op1");
 const op2 = document.getElementById("op2");
 const startBtn = document.getElementById("startBtn");
+const imageCache = {};
 
 const sons = {
     shelly1: new Audio("audio/Shelly1.mp3"),
@@ -199,7 +201,7 @@ const fases = [
     // FASE 2
     {
         pergunta: "Você ver uma Piper indefesa.\nDeseja pular nela?", img: "image/brawl/fases/Piper.jpg", som: "piper1",
-        sim: { texto: "Um Dynamike usou o acessório e paralisou vocês, eliminando os dois!", morrer: true, img: "image/brawl/fases/Piper1.jpg", som1: "edgar1", som2: "dyna1",  desbloquear: "char-piper"},
+        sim: { texto: "Um Dynamike usou o acessório paralisador e eliminou os dois!", morrer: true, img: "image/brawl/fases/Piper1.jpg", som1: "edgar1", som2: "dyna1",  desbloquear: "char-piper"},
         nao: { 
             texto: "Um Mico saiu de trás das paredes e pulou na Piper", img: "image/brawl/fases/Piper2.jpg", som: "mico1", desbloquear: "char-mico",
             extra: { texto: "Mas um Dynamike aparece e elimina os dois!", img: "image/brawl/fases/Piper2-2.jpg", som: "dyna1"}
@@ -209,7 +211,7 @@ const fases = [
     // FASE 3
     {
         pergunta: "O Dynamike está na sua mira.\nDeseja pular nele?", img: "image/brawl/fases/Dyna.jpg", som: "dyna2",
-        sim: { texto: "Você pegou o Dynamike de surpresa, \"Easy hahaha\"!", img: "image/brawl/fases/Dyna1.jpg", som: "edgar2", desbloquear: "char-dyna"},
+        sim: { texto: "Você pegou o Dynamike de surpresa, \"Easy hahahaha\"!", img: "image/brawl/fases/Dyna1.jpg", som: "edgar2", desbloquear: "char-dyna"},
         nao: { texto: "Um Leon invisível te pegou por trás! \n😏🔥🔥", morrer: true, img: "image/brawl/fases/Dyna2.jpg", som: "leon1", desbloquear: "char-leon" }
     },
 
@@ -219,13 +221,13 @@ const fases = [
         sim: {
             texto: "Vocês se tornam amigos :)", img: "image/brawl/fases/Gene1.jpg", desbloquear: "char-gene", som: "gene2",
             extra: [
-                { texto: "Um Gale surge e te empurra para o gás venenoso junto com um Leon que se aproximava de você invisível.", img: "image/brawl/fases/Gene1-2.jpg", som: "gale1" },
+                { texto: "Um Gale surge e te empurra para o gás venenoso junto com um Leon invisível.", img: "image/brawl/fases/Gene1-2.jpg", som: "gale1" },
                 { texto: "Mas o Eugênio te salva com o super", img: "image/brawl/fases/Gene1-3.jpg", som: "gene3" }
             ]
         },
         nao: {
             texto: "Você mata o Eugênio. \nNunca se deve confiar num Edgar!", img: "image/brawl/fases/Gene1-1.jpg", som: "gene3",
-            extra: { texto: "Um Gale te empurra para o gás venenoso junto com um Leon que se aproximava de você invisível.", img: "image/brawl/fases/Gene1-2.jpg", som: "gale1", desbloquear: "char-gale", morrer: true }
+            extra: { texto: "Um Gale te empurra para o gás venenoso junto com um Leon invisível.", img: "image/brawl/fases/Gene1-2.jpg", som: "gale1", desbloquear: "char-gale", morrer: true }
         }
     },
 
@@ -238,7 +240,7 @@ const fases = [
             extra: [
                 { texto: "Dois brawlers pulam na Shelly!", img: "image/brawl/fases/Final2-2.jpg", som1: "corvo1", som2: "primo1" },
                 { texto: "A Shelly ativa hipercarga e derrota o Corvo.", img: "image/brawl/fases/Final2-3.jpg", som1: "shelly6", som2: "corvo2" },
-                { texto: "Ela luta com o El Primo e vence, mas está fraca.", img: "image/brawl/fases/Final2-4.jpg", som1: "shelly5", som2: "primo2" }
+                { texto: "Ela luta com o El Primo e vence. \nMas está fraca.", img: "image/brawl/fases/Final2-4.jpg", som1: "shelly5", som2: "primo2" }
             ]
         }
     },
@@ -246,10 +248,60 @@ const fases = [
     // DECISÃO FINAL
     {
         pergunta: "Você irá atacá-la?", img: "image/brawl/fases/Final2-4.jpg",
-        sim: { texto: "Você derrota a Shelly enquanto ela está fraca! \nQue covardia, mas ganhou né", img: "image/brawl/fases/Ganhou.jpg", som: "vitoria", ganhar: true },
+        sim: { texto: "Você derrota a Shelly enquanto ela está fraca! \nQue covardia, mas ganhou né?", img: "image/brawl/fases/Ganhou.jpg", som: "vitoria", ganhar: true },
         nao: { texto: "Você manda um joinha. \nShelly se elimina no gás incrédula com o que viu!", img: "image/brawl/fases/Extra.jpg", som: "edgar2",  desbloquear: "char-edgar", ganhar: true }
     }
 ];
+
+// Carregamento de imagens
+function preloadImage(src) {
+    if (imageCache[src]) return Promise.resolve(imageCache[src]);
+
+    return new Promise((resolve) => {
+        const imgTemp = new Image();
+        imgTemp.src = src;
+        imgTemp.onload = () => {
+            imageCache[src] = imgTemp;
+            resolve(imgTemp);
+        };
+        imgTemp.onerror = () => resolve(null);
+    });
+}
+
+function preloadAllImages() {
+    const imagens = new Set();
+
+    fases.forEach(f => {
+        imagens.add(f.img);
+
+        ["sim", "nao"].forEach(k => {
+            if (f[k]?.img) imagens.add(f[k].img);
+
+            if (f[k]?.extra) {
+                if (Array.isArray(f[k].extra)) {
+                    f[k].extra.forEach(e => imagens.add(e.img));
+                } else {
+                    imagens.add(f[k].extra.img);
+                }
+            }
+        });
+    });
+
+    imagens.add("image/brawl/fases/Perdeu.jpg");
+    imagens.add("image/brawl/fases/Ganhou.jpg");
+
+    return Promise.all([...imagens].map(src => preloadImage(src)));
+}
+
+function atualizarSelecao() {
+    if (opcaoSelecionada === 0) {
+        op1.classList.add("selecionado");
+        op2.classList.remove("selecionado");
+    } else {
+        op2.classList.add("selecionado");
+        op1.classList.remove("selecionado");
+    }
+}
 
 let faseAtual = -1;
 let filaCenas = [];
@@ -285,8 +337,9 @@ function proximaFase() {
     op2.style.display = "inline-block";
     op1.onclick = () => escolher(true);
     op2.onclick = () => escolher(false);
+    opcaoSelecionada = 0;
+    atualizarSelecao();
 }
-
 
 function escolher(sim) {
     let f = fases[faseAtual];
@@ -353,22 +406,23 @@ function escolher(sim) {
     op1.innerText = "Continuar";
     op1.onclick = avancarCena;
     op2.style.display = "none";
-
+    opcaoSelecionada = 0;
+    atualizarSelecao();
     avancarCena();
 }
 
-
 function avancarCena() {
     if (filaCenas.length === 0) return proximaFase();
-
     let cena = filaCenas.shift();
 
-    img.src = cena.img;
-    textoTela.innerText = cena.texto;
+    preloadImage(cena.img).then(() => {
+        img.src = imageCache[cena.img]?.src || cena.img;
+        textoTela.innerText = cena.texto;
+    });
 
     if (cena.sonsDaCena && cena.sonsDaCena.length > 0) {
         tocarSonsDaCena(cena.sonsDaCena);
-    } else {}
+    }
 
     if (cena.morrer) {
         filaCenas.unshift({
@@ -441,6 +495,36 @@ function desbloquearPersonagem(id) {
         el.classList.add("animate");
     }
 }
+
+document.addEventListener("keydown", (e) => {
+    if (!["ArrowLeft", "ArrowRight", "Enter"].includes(e.key)) return;
+
+    e.preventDefault();
+
+    // Setas APENAS mudam seleção
+    if (e.key === "ArrowLeft") {
+        opcaoSelecionada = 0;
+        atualizarSelecao();
+    }
+
+    if (e.key === "ArrowRight" && op2.style.display !== "none") {
+        opcaoSelecionada = 1;
+        atualizarSelecao();
+    }
+
+    // Enter CONFIRMA
+    if (e.key === "Enter") {
+        if (opcaoSelecionada === 0) {
+            op1.click();
+        } else if (opcaoSelecionada === 1 && op2.style.display !== "none") {
+            op2.click();
+        }
+    }
+});
+
+preloadAllImages().then(() => {
+    textoTela.innerText = "Preparado para brawltalhar?";
+});
 
 startBtn.onclick = iniciarJogo;
 }); /* Fim do Brawl Star */
