@@ -547,8 +547,43 @@ let tempo = 0;
 let tempoMax = 0;
 let jogoAtivo = false;
 let aguardandoContinuar = false;
+let opcaoSelecionada = 0;
 
 const ranking = { p1: 0, p2: 0, p3: 0, p4: 0 };
+
+// Pré-carregamento das imagens
+const imagens = [
+    "image/batata/Tela-inicial.jpg",
+    "image/batata/Vitoria.png",
+    "image/batata/Queimou1.jpg",
+    "image/batata/Queimou2.jpg",
+    "image/batata/Quente1.jpg",
+    "image/batata/Quente2.jpg",
+    "image/batata/Quente3.jpg",
+    "image/batata/Quente4.jpg",
+    "image/batata/Quente5.jpg",
+    "image/batata/Quente6.jpg"
+];
+
+const imageCache = {};
+
+imagens.forEach(src => {
+    const img = new Image();
+    img.src = src;
+    imageCache[src] = img;
+});
+
+// Cotrole de seleção via teclado
+function atualizarSelecao() {
+    btnPassar.classList.remove("selecionado");
+    btnEsperar.classList.remove("selecionado");
+
+    if (opcaoSelecionada === 0) {
+        btnPassar.classList.add("selecionado");
+    } else if (opcaoSelecionada === 1 && btnEsperar.style.display !== "none") {
+        btnEsperar.classList.add("selecionado");
+    }
+}
 
 // Números de rodadas para a batata explodir
 function novoTempoMax() {
@@ -558,10 +593,14 @@ function novoTempoMax() {
 // Renomeia os Jogadores
 function atualizarJogadores() {
     fila = [];
+
     for (let i = 1; i <= 4; i++) {
         let nome = document.getElementById(`j${i}`).value.trim();
         if (!nome) nome = `Jogador ${i}`;
         fila.push(nome);
+
+        // ATUALIZA O NOME NO PLACAR
+        document.querySelector(`.r-item[data-jogador="${i}"] .nome`).textContent = nome;
     }
 }
 
@@ -599,11 +638,13 @@ btnPlay.addEventListener("click", () => {
     tempoMax = novoTempoMax();
     jogoAtivo = true;
     aguardandoContinuar = false;
+    opcaoSelecionada = 0;
+    atualizarSelecao();
 
     ganhadorDiv.classList.remove("show");
 
     msgBatata.textContent = `Vez do ${fila[currentIndex]}`;
-    telaBatata.src = "image/batata/Quente1.jpg";
+    telaBatata.src = imageCache["image/batata/Quente1.jpg"].src;
 
     btnPassar.textContent = "Passar";
     btnEsperar.textContent = "Esperar";
@@ -613,7 +654,6 @@ btnPlay.addEventListener("click", () => {
 
     btnPlay.style.display = "none";
 });
-
 
 // Botão Passar/Sim
 btnPassar.addEventListener("click", () => {
@@ -626,7 +666,7 @@ btnPassar.addEventListener("click", () => {
         aguardandoContinuar = false;
 
         msgBatata.textContent = `Vez do ${fila[currentIndex]}`;
-        telaBatata.src = "image/batata/Quente1.jpg";
+        telaBatata.src = imageCache["image/batata/Quente1.jpg"].src;
 
         btnPassar.textContent = "Passar";
         btnEsperar.textContent = "Esperar";
@@ -640,9 +680,12 @@ btnPassar.addEventListener("click", () => {
         btnPassar.textContent = "Passar";
         btnEsperar.style.display = "inline-block";
 
+        opcaoSelecionada = 0;
+        atualizarSelecao();
+
         if (fila.length > 1) {
             msgBatata.textContent = `Vez do ${fila[currentIndex]}`;
-            telaBatata.src = "image/batata/Quente1.jpg";
+            telaBatata.src = imageCache["image/batata/Quente1.jpg"].src;
         } else {
             finalizarJogo();
         }
@@ -666,36 +709,39 @@ function rodarTurno(passou) {
     if (!jogoAtivo) return;
     tempo++;
 
-    const imgQuenteAntes = `image/batata/Quente${Math.floor(Math.random() * 6) + 1}.jpg`;
-    telaBatata.src = imgQuenteAntes;
+    // Troca a imagem quente
+    const img = `image/batata/Quente${Math.floor(Math.random() * 6) + 1}.jpg`;
+    telaBatata.src = imageCache[img].src;
 
+    // SE PASSOU, MUDA DE JOGADOR
+    if (passou) {
+        currentIndex = (currentIndex + 1) % fila.length;
+    }
+
+    // VERIFICA EXPLOSÃO APÓS O TURNO
     if (tempo >= tempoMax) {
         const eliminado = fila.splice(currentIndex, 1)[0];
-        msgBatata.textContent = `Eliminado: ${eliminado}`;
-        telaBatata.src = `image/batata/Queimou${Math.floor(Math.random() * 2) + 1}.jpg`;
 
+        msgBatata.textContent = `Eliminado: ${eliminado}`;
+        telaBatata.src = imageCache[`image/batata/Queimou${Math.floor(Math.random() * 2) + 1}.jpg`].src;
         tempo = 0;
         tempoMax = novoTempoMax();
 
-        if (currentIndex >= fila.length && fila.length > 0) {
+        if (currentIndex >= fila.length) {
             currentIndex = 0;
         }
 
         btnPassar.textContent = "Continuar";
         btnEsperar.style.display = "none";
         aguardandoContinuar = true;
-
+        opcaoSelecionada = 0;
+        atualizarSelecao();
         return;
     }
 
-    if (passou) {
-        currentIndex = (currentIndex + 1) % fila.length;
-    }
-
     msgBatata.textContent = `Vez do ${fila[currentIndex]}`;
-    const imgQuenteDepois = `image/batata/Quente${Math.floor(Math.random() * 6) + 1}.jpg`;
-    telaBatata.src = imgQuenteDepois;
 
+    // Se sobrar apenas um
     if (fila.length === 1) {
         finalizarJogo();
     }
@@ -708,7 +754,7 @@ function finalizarJogo() {
     explosaoVitoria(); //Animação de Vitória
 
     msgBatata.textContent = `Ganhador: ${vencedor}`;
-    telaBatata.src = "image/batata/Vitoria.png";
+    telaBatata.src = imageCache["image/batata/Vitoria.png"].src;
 
     ganhadorDiv.textContent = `🏆 ${vencedor} 🏆`;
     ganhadorDiv.style.display = "block";
@@ -725,10 +771,42 @@ function finalizarJogo() {
     btnEsperar.style.display = "none";
     jogoAtivo = false;
     aguardandoContinuar = false;
+    btnPassar.classList.remove("selecionado");
+    btnEsperar.classList.remove("selecionado");
 
     btnPlay.style.display = "inline-block";
     btnPlay.textContent = "Jogar novamente";
 }
+
+document.addEventListener("keydown", (e) => {
+    if (!["ArrowLeft", "ArrowRight", "Enter"].includes(e.key)) return;
+    if (!jogoAtivo && !aguardandoContinuar) return;
+
+    e.preventDefault();
+
+    // ⬅️ Seleciona PASSAR
+    if (e.key === "ArrowLeft") {
+        opcaoSelecionada = 0;
+        atualizarSelecao();
+    }
+
+    // ➡️ Seleciona ESPERAR
+    if (e.key === "ArrowRight" && btnEsperar.style.display !== "none") {
+        opcaoSelecionada = 1;
+        atualizarSelecao();
+    }
+
+    // CONFIRMA
+    if (e.key === "Enter") {
+        if (opcaoSelecionada === 0) {
+            btnPassar.click();
+        } 
+        else if (opcaoSelecionada === 1 && btnEsperar.style.display !== "none") {
+            btnEsperar.click();
+        }
+    }
+});
+
 }); /* Fim do Bloco da Batata Quente */
 
 
