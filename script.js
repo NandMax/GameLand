@@ -818,23 +818,23 @@ document.getElementById('form-casal').addEventListener('submit', function(e) {
 
     const nome1 = document.getElementById('nome1').value.trim();
     const nome2 = document.getElementById('nome2').value.trim();
-    
+
     if (!nome1 || !nome2) {
         alert("Por favor, digite os dois nomes.");
         return;
     }
+
     const compatibilidade = calcularCompatibilidade(nome1, nome2);
     updateUI(compatibilidade);
     updateRanking(nome1, nome2, compatibilidade);
 });
-
 
 function calcularCompatibilidade(nome1, nome2) {
     // 1. Normalização (remove acentos e cedilhas)
     let casal = (nome1 + nome2).toLowerCase();
     casal = casal.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    // 2. Remove caracteres não-alfabéticos (o seu filtro original)
+    // 2. Remove caracteres não-alfabéticos
     casal = casal.replace(/[^a-z]/g, ''); 
     
     let letras = Array.from(casal);
@@ -896,7 +896,16 @@ function calcularCompatibilidade(nome1, nome2) {
         resultado = '0';
     }
     
+    chuvaDeCoracoes();
     return Math.min(100, parseInt(resultado));
+}
+
+function normalizarNome(nome) {
+    return nome
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z]/g, "");
 }
 
 function updateUI(compatibilidade) {
@@ -928,85 +937,154 @@ function updateUI(compatibilidade) {
 
 function updateRanking(nome1, nome2, compatibilidade) {
     const rankingList = document.getElementById('ranking-list');
-    const minRankingScore = 75; 
-    
-    if (compatibilidade > minRankingScore) {
-        
-        const novoCasalTexto = `${nome1} + ${nome2} (${compatibilidade}%)`;
-        const newItem = document.createElement('li');
-        newItem.classList.add('ranking-item');
-        newItem.textContent = novoCasalTexto;
-        newItem.setAttribute('data-score', compatibilidade);
+    const minRankingScore = 75;
 
-        let inserido = false;
-        const itensExistentes = rankingList.children;
+    if (compatibilidade <= minRankingScore) return;
 
-        for (let i = 0; i < itensExistentes.length; i++) {
-            const scoreExistente = parseInt(itensExistentes[i].getAttribute('data-score')) || 0;
-            
-            if (compatibilidade > scoreExistente) {
-                rankingList.insertBefore(newItem, itensExistentes[i]);
-                inserido = true;
-                break;
-            }
-        }
-        
-        if (!inserido) {
-            rankingList.appendChild(newItem);
+    const nomeA = normalizarNome(nome1);
+    const nomeB = normalizarNome(nome2);
+
+    // chave única do casal (ordem não importa)
+    const chaveCasal = [nomeA, nomeB].sort().join('-');
+
+    const itensExistentes = rankingList.children;
+
+    // bloqueia casal repetido
+    for (let i = 0; i < itensExistentes.length; i++) {
+        const item = itensExistentes[i];
+
+        // se não tiver data-casal, cria a partir do texto
+        if (!item.dataset.casal) {
+            const texto = item.textContent.split('(')[0]; // "Nome1 + Nome2 "
+            const [n1, n2] = texto.split('+').map(n => normalizarNome(n));
+            item.dataset.casal = [n1, n2].sort().join('-');
         }
 
-        const limite = 5;
-        if (rankingList.children.length > limite) {
-            rankingList.removeChild(rankingList.lastElementChild);
+        if (item.dataset.casal === chaveCasal) {
+            return; // ❌ casal já existe
         }
+    }
 
-        const itensAtualizados = rankingList.children;
-        for (let i = 0; i < itensAtualizados.length; i++) {
-            const item = itensAtualizados[i];
-            item.classList.remove('female-bg', 'male-bg');
-            const isFemaleBg = i % 2 !== 0; 
-            item.classList.add(isFemaleBg ? 'female-bg' : 'male-bg');
+    // cria o item
+    const newItem = document.createElement('li');
+    newItem.classList.add('ranking-item');
+    newItem.textContent = `${nome1} + ${nome2} (${compatibilidade}%)`;
+    newItem.setAttribute('data-score', compatibilidade);
+    newItem.dataset.casal = chaveCasal;
+
+    let inserido = false;
+
+    // ordena por pontuação
+    for (let i = 0; i < itensExistentes.length; i++) {
+        const scoreExistente = parseInt(itensExistentes[i].dataset.score) || 0;
+
+        if (compatibilidade > scoreExistente) {
+            rankingList.insertBefore(newItem, itensExistentes[i]);
+            inserido = true;
+            break;
         }
-        
-        newItem.style.opacity = 0;
-        setTimeout(() => {
-             newItem.style.opacity = 1;
-             newItem.style.transition = 'opacity 0.5s';
-        }, 10);
+    }
+
+    if (!inserido) {
+        rankingList.appendChild(newItem);
+    }
+
+    // limite do ranking
+    const limite = 5;
+    if (rankingList.children.length > limite) {
+        rankingList.removeChild(rankingList.lastElementChild);
+    }
+
+    // alternância de cores
+    const itensAtualizados = rankingList.children;
+    for (let i = 0; i < itensAtualizados.length; i++) {
+        const item = itensAtualizados[i];
+        item.classList.remove('female-bg', 'male-bg');
+        item.classList.add(i % 2 !== 0 ? 'female-bg' : 'male-bg');
+    }
+
+    // animação
+    newItem.style.opacity = 0;
+    setTimeout(() => {
+        newItem.style.opacity = 1;
+        newItem.style.transition = 'opacity 0.5s';
+    }, 10);
+
+    salvarRanking();
+}
+
+function salvarRanking() {
+    const rankingList = document.getElementById('ranking-list');
+    const itens = [];
+
+    for (let item of rankingList.children) {
+        itens.push({
+            texto: item.textContent,
+            score: item.dataset.score,
+            casal: item.dataset.casal
+        });
+    }
+
+    localStorage.setItem('rankingCasais', JSON.stringify(itens));
+}
+
+function carregarRanking() {
+    const rankingList = document.getElementById('ranking-list');
+    const dados = JSON.parse(localStorage.getItem('rankingCasais')) || [];
+
+    rankingList.innerHTML = '';
+
+    dados.forEach(dado => {
+        const li = document.createElement('li');
+        li.classList.add('ranking-item');
+        li.textContent = dado.texto;
+        li.dataset.score = dado.score;
+        li.dataset.casal = dado.casal;
+        rankingList.appendChild(li);
+    });
+
+    // reaplica cores
+    const itensAtualizados = rankingList.children;
+    for (let i = 0; i < itensAtualizados.length; i++) {
+        itensAtualizados[i].classList.add(i % 2 !== 0 ? 'female-bg' : 'male-bg');
     }
 }
 
-function updateUI(compatibilidade) {
-    const resultBox = document.getElementById('result-box');
-    const compatibilityBar = document.getElementById('heart-bar');
-    const telaLover = document.getElementById('tela-lover');
+function chuvaDeCoracoes() {
+    const container = document.getElementById("explosao-container");
+    const quantidade = 30;
 
-    resultBox.textContent = `${compatibilidade}%`;
-    compatibilityBar.style.height = `${compatibilidade}%`;
-    
-    let imagePath = '';
-    
-    if (compatibilidade <= 20) {
-        imagePath = 'image/match/Casal1.jpg';
-    } else if (compatibilidade <= 50) {
-        imagePath = 'image/match/Casal2.jpg';
-    } else if (compatibilidade <= 75) {
-        imagePath = 'image/match/Casal3.jpg';
-    } else if (compatibilidade <= 85) {
-        imagePath = 'image/match/Casal4.jpg';
-    } else if (compatibilidade <= 95) {
-        imagePath = 'image/match/Casal5.jpg';
-    } else { // 96% - 100%
-        imagePath = 'image/match/Casal6.jpg';
+    const centroX = window.innerWidth / 2;
+    const centroY = window.innerHeight / 2;
+
+    for (let i = 0; i < quantidade; i++) {
+        const coracao = document.createElement("img");
+        coracao.classList.add("particula");
+
+        coracao.src = "https://cdn-icons-png.flaticon.com/512/833/833472.png";
+
+        coracao.style.left = centroX + "px";
+        coracao.style.top = centroY + "px";
+
+        const angulo = (Math.PI * 2 * i) / quantidade;
+        const distancia = 200 + Math.random() * 150;
+
+        coracao.style.setProperty("--dx", Math.cos(angulo) * distancia + "px");
+        coracao.style.setProperty("--dy", Math.sin(angulo) * distancia + "px");
+
+        coracao.style.width = 20 + Math.random() * 20 + "px";
+        coracao.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+        container.appendChild(coracao);
+
+        setTimeout(() => coracao.remove(), 1000);
     }
-    
-    telaLover.src = imagePath; 
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('heart-bar').style.height = '0%';
-    document.getElementById('result-box').textContent = '--%';
-});
+document.getElementById('heart-bar').style.height = '0%';
+document.getElementById('result-box').textContent = '--';
+carregarRanking();
+
 }); /* Fim do Deu Match */
 
 
