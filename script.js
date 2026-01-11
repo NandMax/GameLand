@@ -47,6 +47,7 @@ const sons = {
 
     derrota: new Audio("audio/Derrota.mp3"),
     vitoria: new Audio("audio/Vitoria.mp3"),
+    inicio: new Audio("audio/Battle-Start.mp3"),
 };
 
 // mensagem inicial / textos dos botões
@@ -259,6 +260,7 @@ function iniciarJogo() {
     faseAtual = -1;
     textoTela.innerText = "";
     pararSom();
+    tocarSonsDaCena("inicio");
     op2.style.display = "inline-block";
     proximaFase();
 }
